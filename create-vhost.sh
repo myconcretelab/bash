@@ -107,12 +107,23 @@ if [ ! -d $root/$vhost ]
   ## Deplacer application dans le depot git si il n'y existe pas encore
   if [ ! -d $root/$globalApplicationFolder/$dirname ]
     then
+      # On est dans l'instalation d'un nouveau site
       echo " - Copying $vhost/application to the global application folder"
       mv -f $root/$vhost/application $root/$globalApplicationFolder/$dirname
     else
       # Si le dossier existe dans le depot git on supprime celui qui était dans le boilerplate
       echo " - Deleting application folder from boilerplate"
       rm -r -f $root/$vhost/application
+      ## on efface le fichier database.php si il existe
+      if [ -a $root/$vhost/application/config/database.php ]
+        echo " - Deleting database config file"
+        then rm -f $root/$vhost/application/config/database.php
+      fi
+      # on met a jour les donnée de connection de la DB du fichier database.php
+      echo " - Create database config file + update database name"
+      cp $root/$globalMysqlFolder/database.php $root/$vhost/application/config/database.php
+      sed -i.original 's/databaseName/'$databaseName'/g' $root/$vhost/application/config/database.php
+      rm -f $root/$vhost/application/config/database.php.original
   fi
     # et en faire un lien symbolique du depot git vers le vhost
     echo " - Create symbolic link from global application to $vhost"
@@ -130,16 +141,6 @@ if [ ! -d $root/$vhost ]
     rm -f $root/$vhost/.htaccess.original
   fi
 
-  ## on efface le fichier database.php si il existe
-  if [ -a $root/$vhost/application/config/database.php ]
-    echo " - Deleting database config file"
-    then rm -f $root/$vhost/application/config/database.php
-  fi
-  # on met a jour les donnée de connection de la DB du fichier database.php
-    echo " - Create database config file + update database name"
-    cp $root/$globalMysqlFolder/database.php $root/$vhost/application/config/database.php
-    sed -i.original 's/databaseName/'$databaseName'/g' $root/$vhost/application/config/database.php
-    rm -f $root/$vhost/application/config/database.php.original
 else
   echo "## Updating $vhost with $1 ##"
 fi
