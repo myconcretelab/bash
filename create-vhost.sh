@@ -161,9 +161,9 @@ if [ ! -d $root/$vhost ]
 
 
 ## database.php
+
+
 databaseFile=$root/$vhost/application/config/database.php
-
-
   ## on efface le fichier database.php si il existe
   if [ -a $databaseFile ]
     echo " - Deleting database config file"
