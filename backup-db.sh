@@ -1,25 +1,12 @@
 #!/bin/bash
 
-NOW=`date +"%Y-%m"`;
 root="/Applications/MAMP/htdocs/_mysql";
 
 ### Server Setup ###
-#* MySQL login user name *#
 MUSER="root";
-
-#* MySQL login PASSWORD name *#
 MPASS="root";
-
-#* MySQL login HOST name *#
 MHOST="localhost";
 MPORT="8889";
-
-# DO NOT BACKUP these databases
-IGNOREDB="
-information_schema
-mysql
-test
-"
 
 #* MySQL binaries *#
 MYSQL=`which mysql`;

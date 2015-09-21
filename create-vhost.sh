@@ -165,11 +165,3 @@ if [ -a $root/$globalMysqlFolder/$databaseName.sql.txt ]
 fi
 
 echo " - Finished. You may need to update the C5 instalation : http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
-
-if which xdg-open > /dev/null
-then
-  xdg-open "http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
-elif which gnome-open > /dev/null
-then
-  gnome-open "http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
-fi
