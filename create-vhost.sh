@@ -1,5 +1,11 @@
 #!/bin/bash
 
+##  USAGE :
+##  ./create-vhost.sh handle_theme domain subdomain : create subdomain.domain and .git application
+##  ./create-vhost.sh none domain subdomain : create subdomain.domain BUT do not .git application
+
+
+
 if [ "$2" == "" ]
   then
     echo 'ERROR : No instalation name'
@@ -18,6 +24,13 @@ boilerplateFolder="c5-boilerplate"
 sqlU="root"
 sqlP="root"
 dbExist=false
+
+if [ $1 == 'none' ]
+  then
+  databasePrefix='local_'
+else
+  databasePrefix='myconcretelab_'
+fi
 
 cd $root
 
@@ -68,16 +81,18 @@ fi
 
 ## Maintenant on va verifier si le package existe et le mettre a jour sionon
 
-cd $root/$globalPackagesFolder
-
-if [ ! -d $1 ]
+if [ $1 != 'none' ]
   then
-  echo " - Add $1.git"
-  git clone git@github.com:myconcretelab/c5-boilerplate.git $boilerplateFolder
-else
-  cd $1
-  echo " - Update $1.git"
-  git pull
+  cd $root/$globalPackagesFolder
+  if [ ! -d $1 ]
+    then
+    echo " - Add $1.git"
+    git clone git@github.com:myconcretelab/c5-boilerplate.git $boilerplateFolder
+  else
+    cd $1
+    echo " - Update $1.git"
+    git pull
+  fi
 fi
 cd $root
 
@@ -87,15 +102,16 @@ if [ "$3" != "" ]
 then
   vhost="$2.$3"
   dirname="$2_$3"
-  databaseName="myconcretelab_$2_$3"
+  databaseName="$databasePrefix$2_$3"
 else
   vhost=$2
   dirname="$2"
-  databaseName="myconcretelab_$2"
+  databaseName="$databasePrefix$2"
 fi
 
 ## On duplique le boilerplate, on y place concrete et packages.
 ## si le vhost existe on suppose que tout ce folders sont OK
+
 if [ ! -d $root/$vhost ]
   then
   echo "## Creation of $vhost with the $1 ##"
@@ -104,25 +120,38 @@ if [ ! -d $root/$vhost ]
   echo " - Creating symbolic links to concrete, packages"
   ln -s $root/$globalConcreteFolder/concrete $root/$vhost/concrete
   ln -s $root/$globalPackagesFolder $root/$vhost/packages
-  ## Deplacer application dans le depot git si il n'y existe pas encore
-  if [ ! -d $root/$globalApplicationFolder/$dirname ]
+
+
+  ## Le dossier Aplication
+
+
+  if [ $1 != "none" ]
     then
-      echo " - Copying $vhost/application to the global application folder"
-      mv -f $root/$vhost/application $root/$globalApplicationFolder/$dirname
-    else
-      # Si le dossier existe dans le depot git on supprime celui qui était dans le boilerplate
-      echo " - Deleting application folder from boilerplate"
-      rm -r -f $root/$vhost/application
-  fi
+    ## Deplacer application dans le depot git si il n'y existe pas encore
+    ## Si nous ne voulons pas que le dossier application soit suivi dans le git on met "none" en temps que nom de theme
+    if [ ! -d $root/$globalApplicationFolder/$dirname ]
+      then
+        echo " - Copying $vhost/application to the global application folder"
+        mv -f $root/$vhost/application $root/$globalApplicationFolder/$dirname
+      else
+        # Si le dossier existe dans le depot git on supprime celui qui était dans le boilerplate
+        echo " - Deleting application folder from boilerplate"
+        rm -r -f $root/$vhost/application
+    fi
     # et en faire un lien symbolique du depot git vers le vhost
     echo " - Create symbolic link from global application to $vhost"
     ln -s $root/$globalApplicationFolder/$dirname $root/$vhost/application
-
+  fi
   ## On nettoie le dossier application
   if [ -d $root/$vhost/application/files/cache ]
     then
     rm -r -f $root/$vhost/application/files/cache
   fi
+
+
+## .htaccess
+
+
   if [ -a $root/$vhost/.htaccess ]
     then
     relativevhost="$vhost\/index.php"
@@ -130,22 +159,29 @@ if [ ! -d $root/$vhost ]
     rm -f $root/$vhost/.htaccess.original
   fi
 
+
+## database.php
+databaseFile=$root/$vhost/application/config/database.php
+
+
   ## on efface le fichier database.php si il existe
-  if [ -a $root/$vhost/application/config/database.php ]
+  if [ -a $databaseFile ]
     echo " - Deleting database config file"
-    then rm -f $root/$vhost/application/config/database.php
+    then rm -f $databaseFile
   fi
   # on met a jour les donnée de connection de la DB du fichier database.php
     echo " - Create database config file + update database name"
-    cp $root/$globalMysqlFolder/database.php $root/$vhost/application/config/database.php
-    sed -i.original 's/databaseName/'$databaseName'/g' $root/$vhost/application/config/database.php
-    rm -f $root/$vhost/application/config/database.php.original
-else
+    cp $root/$globalMysqlFolder/database.php $databaseFile
+    sed -i.original 's/databaseName/'$databaseName'/g' $databaseFile
+    rm -f $databaseFile.original
+else ## if [ ! -d $root/$vhost ]
   echo "## Updating $vhost with $1 ##"
 fi
 
 
-## On crée la DB si elle n'existe pas
+## DB
+
+
 if [ ! -d /Applications/MAMP/db/mysql/$databaseName ]
   then
     echo " - Creating database $databaseName"
