@@ -169,11 +169,17 @@ databaseFile=$root/$vhost/application/config/database.php
     echo " - Deleting database config file"
     then rm -f $databaseFile
   fi
-  # on met a jour les donnée de connection de la DB du fichier database.php
+  ## Maintenant on suppose que si le fichier app.php n'existe pas
+  ## cela revient a dire que le site n'a jamais été istallé
+  ## donc on ne crée pas de fichier database
+  ## pour que la procédure d'instalation C5 s'enclenche
+  if [ ! -a $root/$vhost/application/config/app.php ]
+    # on met a jour les donnée de connection de la DB du fichier database.php
     echo " - Create database config file + update database name"
     cp $root/$globalMysqlFolder/database.php $databaseFile
     sed -i.original 's/databaseName/'$databaseName'/g' $databaseFile
     rm -f $databaseFile.original
+  fi
 else ## if [ ! -d $root/$vhost ]
   echo "## Updating $vhost with $1 ##"
 fi
