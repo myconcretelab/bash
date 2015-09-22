@@ -35,49 +35,49 @@ fi
 cd $root
 
 ### Check for git repos ####
-
-if [ ! -d $globalApplicationFolder ]
-  then
-  echo " - Add concrete5-applications.git"
-  git clone git@github.com:myconcretelab/concrete5-applications.git $globalApplicationFolder
-else
-  cd $globalApplicationFolder
-  echo " - Update concrete5-applications.git"
-  git pull
-fi
-cd $root
-
-if [ ! -d $globalMysqlFolder ]
-  then
-  echo " - Add mysql.git"
-  git clone git@github.com:myconcretelab/mysql.git $globalMysqlFolder
-else
-  cd $globalMysqlFolder
-  echo " - Update mysql.git"
-  git pull
-fi
-cd $root
-
-if [ ! -d $globalConcreteFolder ]
-  then
-  echo " - Add concrete5_engine.git"
-  git clone git@github.com:myconcretelab/concrete5_engine.git $globalConcreteFolder
-else
-  cd $globalConcreteFolder
-  echo " - Update concrete5_engine.git"
-  git pull
-fi
-cd $root
-
-if [ ! -d $boilerplateFolder ]
-  then
-  echo " - Add c5boilerplate.git"
-  git clone git@github.com:myconcretelab/c5-boilerplate.git $boilerplateFolder
-else
-  cd $boilerplateFolder
-  echo " - Update c5-boilerplate.git"
-  git pull
-fi
+#
+# if [ ! -d $globalApplicationFolder ]
+#   then
+#   echo " - Add concrete5-applications.git"
+#   git clone git@github.com:myconcretelab/concrete5-applications.git $globalApplicationFolder
+# else
+#   cd $globalApplicationFolder
+#   echo " - Update concrete5-applications.git"
+#   git pull
+# fi
+# cd $root
+#
+# if [ ! -d $globalMysqlFolder ]
+#   then
+#   echo " - Add mysql.git"
+#   git clone git@github.com:myconcretelab/mysql.git $globalMysqlFolder
+# else
+#   cd $globalMysqlFolder
+#   echo " - Update mysql.git"
+#   git pull
+# fi
+# cd $root
+#
+# if [ ! -d $globalConcreteFolder ]
+#   then
+#   echo " - Add concrete5_engine.git"
+#   git clone git@github.com:myconcretelab/concrete5_engine.git $globalConcreteFolder
+# else
+#   cd $globalConcreteFolder
+#   echo " - Update concrete5_engine.git"
+#   git pull
+# fi
+# cd $root
+#
+# if [ ! -d $boilerplateFolder ]
+#   then
+#   echo " - Add c5boilerplate.git"
+#   git clone git@github.com:myconcretelab/c5-boilerplate.git $boilerplateFolder
+# else
+#   cd $boilerplateFolder
+#   echo " - Update c5-boilerplate.git"
+#   git pull
+# fi
 
 ## Maintenant on va verifier si le package existe et le mettre a jour sionon
 
@@ -87,7 +87,7 @@ if [ $1 != 'none' ]
   if [ ! -d $1 ]
     then
     echo " - Add $1.git"
-    git clone git@github.com:myconcretelab/c5-boilerplate.git $boilerplateFolder
+    git clone git@github.com:myconcretelab/$1.git $1
   else
     cd $1
     echo " - Update $1.git"
@@ -166,14 +166,16 @@ if [ ! -d $root/$vhost ]
 databaseFile=$root/$vhost/application/config/database.php
   ## on efface le fichier database.php si il existe
   if [ -a $databaseFile ]
+    then
     echo " - Deleting database config file"
-    then rm -f $databaseFile
+    rm -f $databaseFile
   fi
   ## Maintenant on suppose que si le fichier app.php n'existe pas
   ## cela revient a dire que le site n'a jamais été istallé
   ## donc on ne crée pas de fichier database
   ## pour que la procédure d'instalation C5 s'enclenche
   if [ ! -a $root/$vhost/application/config/app.php ]
+    then
     # on met a jour les donnée de connection de la DB du fichier database.php
     echo " - Create database config file + update database name"
     cp $root/$globalMysqlFolder/database.php $databaseFile
