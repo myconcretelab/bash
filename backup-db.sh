@@ -14,19 +14,37 @@ MYSQLDUMP=`which mysqldump`;
 GZIP=`which gzip`;
 
 # get all database listing
-DBS="$(mysql -u $MUSER -p$MPASS -h $MHOST -P $MPORT -Bse 'show databases')"
+if [ ! $1 == "" ]
+  then
+    DBS="$@"
+    completeDbName=true
+  else
+    DBS="$(mysql -u $MUSER -p$MPASS -h $MHOST -P $MPORT -Bse 'show databases')"
+    completeDbName=false
+fi
 # start to dump database one by one
 for db in $DBS
 do
+  if [ "$completeDbName" = true ]; then
+    db="myconcretelab_$db"
+  fi
   if [[ $db =~ .*myconcretelab_.* ]]
     then
-    file="$root/$db.sql.txt";
-    if [ -a $file ]
+    if [ -d /Applications/MAMP/db/mysql/$db ]
       then
-      echo " - Deleting $db.sql.txt from git repository"
-      rm -f $file
+      file="$root/$db.sql.txt";
+      if [ -a $file ]
+        then
+        echo " - Deleting $db.sql.txt from git repository"
+        rm -f $file
+      fi
+      echo " - Dumping $db and save to $file";
+      $MYSQLDUMP --add-drop-database --opt --lock-all-tables -u $MUSER -p$MPASS -h $MHOST -P $MPORT $db > $file
+    else
+      echo " - It seems that this DB doesn't exist anymore"
     fi
-    echo " - Dumping $db and save to $file";
-    $MYSQLDUMP --add-drop-database --opt --lock-all-tables -u $MUSER -p$MPASS -h $MHOST -P $MPORT $db > $file
+  else
+    echo "ERROR - Not a MCL DB"
   fi
+
 done
