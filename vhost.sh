@@ -137,8 +137,13 @@ dirApplication="$root$dirRel$globalApplicationFolder"
 
 
 ### Check for git repos ####
-if [ ! -z ${update+x} ]
-  then
+if [ ! -z ${update+x} ]; then
+
+  if[ $situation = "remote" ]; then
+    eval `ssh-agent`
+    ssh-add
+  fi
+
   if [ ! -d $dirApplication ]
     then
     echo " - Add concrete5-applications.git"
