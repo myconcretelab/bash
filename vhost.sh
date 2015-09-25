@@ -217,6 +217,7 @@ if [ ! -d $dirVhost ]
 
   ## Symbolic links ##
 
+
   ## On duplique le boilerplate, on y place concrete et packages.
   echo " - Duplicate boilerplate"
   cp -r $dirBoilerPlate $dirVhost
@@ -227,7 +228,12 @@ if [ ! -d $dirVhost ]
     ln -s $dirPackage $dirVhost/packages
   else
     echo " - Creating packages folder"
-    mkdir $dirVhost/packages
+    mkdir "$dirVhost/packages"
+    if [ ! -z ${theme+x} ]; then
+      # Si on a specifié un theme, alors on le copie, sans faire de lien symbolique.
+      # C arrive pour les site de demo dans lesquel, meme si l'utilsateurs supprime le package via l'interface
+      # Il ne sera pas supprimé dans le git
+      cp -r "$dirPackage/$theme" "$dirVhost/packages"
   fi
 
 
