@@ -139,7 +139,7 @@ dirApplication="$root$dirRel$globalApplicationFolder"
 ### Check for git repos ####
 if [ ! -z ${update+x} ]; then
 
-  if[ $situation = "remote" ]; then
+  if [ $situation = "remote" ]; then
     eval `ssh-agent`
     ssh-add
   fi
