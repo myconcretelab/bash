@@ -27,20 +27,27 @@ case $key in
     ## Il peut tout détruire sans conséquences pour les git
     lock=true
     ;;
-    --e|--extern)
+    -e|--extern)
     ## Quand on ne veut pas que le site soit ajouté aux différent git
     ## que la DB soit avec le prefixe "local_" pluto que "myconcretelab_"
     extern=true
     ;;
-    --u|--update)
+    -u|--update)
     ## Quand on veut mettre a jour les git
     update=true
     ;;
-    --d|--delete)
+    -del|--delete)
     ## Quand on veut Supprimer le dossier vhost avant de l'installer
     delete=true
     ;;
-    *)
+    -np|--nopackage)
+    ## Quand on ne veut pas de lien symbolique vers les packages
+    nopackage=true
+    ;;
+    -nodb)
+    ## Quand on ne veut pas creer / updater la db
+    nodb=true
+    ;;    *)
     # unknown option
     ;;
 esac
@@ -57,13 +64,6 @@ else
   echo "I don't know where I am : EXIT"
   exit
 fi
-
-
-
-if [ ! -z ${subdomain+x} ]; then
-  echo " - subdomain : $subdomain"
-fi
-
 
 
 ## Fill variable
@@ -106,36 +106,35 @@ fi
 # Si il n'y a pas de sous domaine le domaine est le parametre
 # sinon c'est domaine.sous-domaine
 if [ ! -z ${domain+x} ]; then
+  _domain="$domain"
   ## Si le domaine est myconcretelab alors le domaine est myconcretelab.com
   ## Sinon, c'est lenomdusite.myconcretelab.com
   if [ "$domain" = "myconcretelab" ]
     then
-    domain="$domain.com"
+    domain="$_domain.com"
   else
-    domain="$domain.myconcretelab.com"
+    domain="$_domain.myconcretelab.com"
   fi
 
   if [ ! -z ${subdomain+x} ]; then
     vhost="$subdomain.$domain"
-    handle=$2"_"$subdomain
+    handle=$_domain"_"$subdomain
     databaseName="$databasePrefix$handle"
   else
     vhost="$domain"
-    handle=$2
-    databaseName="$databasePrefix$handle"
+    handle="$_domain"
+    databaseName="$databasePrefix$_domain"
   fi
 fi
 
 ## On defini les path pour les differents endroits
-dirVhost=$root$dirRel$vhost
-dirBoilerPlate=$root$dirRel$boilerplateFolder
-dirPackage=$root$dirRel$globalPackagesFolder
-dirConcrete=$root$dirRel$globalConcreteFolder
-dirMysql=$root$dirRel$globalMysqlFolder
-dirApplication=$root$dirRel$globalApplicationFolder
+dirVhost="$root$dirRel$vhost"
+dirBoilerPlate="$root$dirRel$boilerplateFolder"
+dirPackage="$root$dirRel$globalPackagesFolder"
+dirConcrete="$root$dirRel$globalConcreteFolder"
+dirMysql="$root$dirRel$globalMysqlFolder"
+dirApplication="$root$dirRel$globalApplicationFolder"
 
-echo $vhost
-exit
 
 ### Check for git repos ####
 if [ ! -z ${update+x} ]
@@ -221,9 +220,15 @@ if [ ! -d $dirVhost ]
   ## On duplique le boilerplate, on y place concrete et packages.
   echo " - Duplicate boilerplate"
   cp -r $dirBoilerPlate $dirVhost
-  echo " - Creating symbolic links to concrete, packages"
+  echo " - Creating symbolic links to concrete"
   ln -s $dirConcrete/concrete $dirVhost/concrete
-  ln -s $dirPackage $dirVhost/packages
+  if [ -z ${nopackage+x} ]; then
+    echo " - Creating symbolic links to packages"
+    ln -s $dirPackage $dirVhost/packages
+  else
+    echo " - Creating packages folder"
+    mkdir $dirVhost/packages
+  fi
 
 
   ## Application ##
@@ -244,13 +249,13 @@ if [ ! -d $dirVhost ]
     # et en faire un lien symbolique du depot git vers le vhost
     echo " - Create symbolic link from global application to $vhost"
     ln -s $dirApplication/$handle $dirVhost/application
-  else
+  elif [ -z ${lock+x} ] || [ -z ${extern+x} ]; then
     if [ -d $dirApplication/$handle ]; then
       echo " ** Locked mode ON **"
       echo " - Deleting application folder from boilerplate"
       rm -rf $dirVhost/application
-      echo " - Duplicate the global application to $vhost"
-      cp $dirApplication/$handle $dirVhost/application
+      echo " - Duplicate the global application ($handle) to $dirVhost"
+      cp -rf "$dirApplication/$handle" "$dirVhost/application"
     fi
   fi
 
@@ -265,6 +270,7 @@ if [ ! -d $dirVhost ]
       ## Si on est en local il faut specifier le dossier du site
       relativevhost="$vhost\/index.php"
     fi
+    echo " - Updating .htaccess"
     sed -i.original 's/vhost/'$relativevhost'/g' $dirVhost/.htaccess
     rm -f $dirVhost/.htaccess.original
   fi
@@ -272,35 +278,37 @@ if [ ! -d $dirVhost ]
 
   ## database.php ##
 
+  if [ -z ${nodb+x} ]; then
+    databaseFile=$dirVhost/application/config/database.php
+    ## on efface le fichier database.php si il existe
+    if [ -a $databaseFile ]
+      then
+      echo " - Deleting database config file"
+      rm -f $databaseFile
+    fi
 
-  databaseFile=$dirVhost/application/config/database.php
-  ## on efface le fichier database.php si il existe
-  if [ -a $databaseFile ]
-    then
-    echo " - Deleting database config file"
-    rm -f $databaseFile
-  fi
 
-  if [ $situation = "remote" ]; then
-    ## On crée la DB Même si elle existe..
-    echo " - Creating database $databaseName"
-    curl --user '7375bf1d975c4851951523c3babed476 account=myconcretelab:' -d '{"permissions":{"'$sqlU'":"FULL"},"type":"MYSQL","name":"'$databaseName'","encoding":"utf8"}' https://api.alwaysdata.com/v1/database/
-  ## Sinon on teste si la DB existe
-  elif [ ! -d /Applications/MAMP/db/mysql/$databaseName ]; then
-    echo " - Creating database $databaseName"
-    mysql -u$sqlU -p$sqlP -e "create database $databaseName"
-  fi
-  ## Maintenant on suppose que si le fichier app.php n'existe pas
-  ## cela revient a dire que le site n'a jamais été installé
-  ## donc on ne crée pas de fichier database
-  ## pour que la procédure d'instalation C5 s'enclenche
-  if [ -a $dirVhost/application/config/app.php ]
-    then
-    # on met a jour les donnée de connection de la DB du fichier database.php
-    echo " - Create database config file + update database name"
-    cp $dirMysql/database.php $databaseFile
-    sed -i.original 's/databaseName/'$databaseName'/g; s/localhost/'$mysqlHost'/g; s/Uname/'$sqlU'/g; s/Pwd/'$sqlP'/g'  $databaseFile
-    rm -f $databaseFile.original
+    if [ $situation = "remote" ]; then
+      ## On crée la DB Même si elle existe..
+      echo " - Creating database $databaseName"
+      curl --user '7375bf1d975c4851951523c3babed476 account=myconcretelab:' -d '{"permissions":{"'$sqlU'":"FULL"},"type":"MYSQL","name":"'$databaseName'","encoding":"utf8"}' https://api.alwaysdata.com/v1/database/
+    ## Sinon on teste si la DB existe
+    elif [ ! -d /Applications/MAMP/db/mysql/$databaseName ]; then
+      echo " - Creating database $databaseName"
+      mysql -u$sqlU -p$sqlP -e "create database $databaseName"
+    fi
+    ## Maintenant on suppose que si le fichier app.php n'existe pas
+    ## cela revient a dire que le site n'a jamais été installé
+    ## donc on ne crée pas de fichier database
+    ## pour que la procédure d'instalation C5 s'enclenche
+    if [ -a $dirVhost/application/config/app.php ]
+      then
+      # on met a jour les donnée de connection de la DB du fichier database.php
+      echo " - Create database config file + update database name"
+      cp $dirMysql/database.php $databaseFile
+      sed -i.original 's/databaseName/'$databaseName'/g; s/localhost/'$mysqlHost'/g; s/Uname/'$sqlU'/g; s/Pwd/'$sqlP'/g'  $databaseFile
+      rm -f $databaseFile.original
+    fi
   fi
 
 
@@ -311,11 +319,13 @@ fi
 
 ## DB ##
 
-# Si le fichier de DB existe dans le depot git, on importe,
-if [ -a $dirMysql/$databaseName.sql.txt ]
-  then
-    echo " - Creating/Updating database $databaseName"
-    mysql -u $sqlU -p$sqlP -h $mysqlHost -D $databaseName < $dirMysql/$databaseName.sql.txt
+if [ -z ${nodb+x} ]; then
+  # Si le fichier de DB existe dans le depot git, on importe,
+  if [ -a $dirMysql/$databaseName.sql.txt ]
+    then
+      echo " - Creating/Updating database $databaseName"
+      mysql -u $sqlU -p$sqlP -h $mysqlHost -D $databaseName < $dirMysql/$databaseName.sql.txt
+  fi
 fi
 
 ## On nettoie le dossier application
