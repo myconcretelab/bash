@@ -56,7 +56,7 @@ done
 
 ## Maintenant on va voir si on est en local ou en remote
 
-if [[ $PWD == *"MAMP"* ]]; then
+if [[ $PWD == *"MAMP"* ]] || [[ $PWD == *"seb"* ]]; then
   situation="local"
 elif [[ $PWD == *"myconcretelab"* ]]; then
   situation="remote"
@@ -310,7 +310,7 @@ if [ ! -d $dirVhost ]; then
     ## Sinon on teste si la DB existe
     elif [ ! -d /Applications/MAMP/db/mysql/$databaseName ]; then
       echo " - Creating database $databaseName"
-      mysql -u$sqlU -p$sqlP -e "create database $databaseName"
+      mysql -u $sqlU -p$sqlP -e "create database $databaseName"
     fi
     ## Maintenant on suppose que si le fichier app.php n'existe pas
     ## cela revient a dire que le site n'a jamais été installé
@@ -348,9 +348,11 @@ if [ -d $dirVhost/application/files/cache ]
   rm -r -f $dirVhost/application/files/cache
 fi
 
-if [ -a $dirVhost/application/config/app.php ]
-  then
-  echo " - Enjoy installing at http://localhost:8888/$vhost with the database : $databaseName"
-else
-  echo " - Finished. You may need to update the C5 instalation : http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
+if [ ! -z ${domain+x} ]; then
+  if [ ! -a $dirVhost/application/config/app.php ]
+    then
+    echo " - Enjoy installing at http://localhost:8888/$vhost with the database : $databaseName"
+  else
+    echo " - Finished. You may need to update the C5 instalation : http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
+  fi
 fi
