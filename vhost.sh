@@ -213,7 +213,7 @@ fi
 if [ ! -d $dirVhost ]; then
   echo "## Creation of $vhost ##"
 
-  if [ situation = "remote" ]; then
+  if [ $situation = "remote" ]; then
     echo " - Create Site at Alwaysdata"
     curl --user '7375bf1d975c4851951523c3babed476 account=myconcretelab:' -d '{"type":"apache_standard","name":"'$handle'","path":"/www/'$vhost'","addresses":["'$vhost'"]}' https://api.alwaysdata.com/v1/site/
   fi
