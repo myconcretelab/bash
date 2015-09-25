@@ -129,11 +129,11 @@ fi
 
 ## On defini les path pour les differents endroits
 dirVhost="$root$dirRel$vhost"
-dirBoilerPlate="$root$dirRel$boilerplateFolder"
-dirPackage="$root$dirRel$globalPackagesFolder"
-dirConcrete="$root$dirRel$globalConcreteFolder"
-dirMysql="$root$dirRel$globalMysqlFolder"
-dirApplication="$root$dirRel$globalApplicationFolder"
+dirBoilerPlate="$root$boilerplateFolder"
+dirPackage="$root$globalPackagesFolder"
+dirConcrete="$root$globalConcreteFolder"
+dirMysql="$root$globalMysqlFolder"
+dirApplication="$root$globalApplicationFolder"
 
 
 ### Check for git repos ####
