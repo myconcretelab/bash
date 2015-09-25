@@ -210,8 +210,7 @@ fi
 
 
 ## si le vhost existe on suppose que tout ce folders sont OK
-if [ ! -d $dirVhost ]
-  then
+if [ ! -d $dirVhost ]; then
   echo "## Creation of $vhost ##"
 
   if [ situation = "remote" ]; then
@@ -226,6 +225,10 @@ if [ ! -d $dirVhost ]
   ## On duplique le boilerplate, on y place concrete et packages.
   echo " - Duplicate boilerplate"
   cp -r $dirBoilerPlate $dirVhost
+  if [ -d "$dirVhost/.git" ]; then
+    echo " - Cleaning application from boilerplate"
+    rm -rf "$dirVhost/.git"
+  fi
   echo " - Creating symbolic links to concrete"
   ln -s $dirConcrete/concrete $dirVhost/concrete
   if [ -z ${nopackage+x} ]; then
@@ -239,6 +242,7 @@ if [ ! -d $dirVhost ]
       # C arrive pour les site de demo dans lesquel, meme si l'utilsateurs supprime le package via l'interface
       # Il ne sera pas supprimé dans le git
       cp -r "$dirPackage/$theme" "$dirVhost/packages"
+    fi
   fi
 
 
@@ -321,8 +325,6 @@ if [ ! -d $dirVhost ]
       rm -f $databaseFile.original
     fi
   fi
-
-
 
 else ## if [ ! -d $dirVhost ]
   echo "## Updating $vhost with $1 ##"
