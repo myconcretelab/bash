@@ -39,7 +39,7 @@ do
         rm -f $file
       fi
       echo " - Dumping $db and save to $file";
-      $MYSQLDUMP --add-drop-database --opt --lock-all-tables -u $MUSER -p$MPASS -h $MHOST -P $MPORT $db > $file
+      mysqldump --add-drop-database --opt --lock-all-tables -u $MUSER -p$MPASS -h $MHOST -P $MPORT $db > $file
     else
       echo " - It seems that this DB doesn't exist anymore"
     fi

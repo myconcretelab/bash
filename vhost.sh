@@ -77,6 +77,7 @@ if [ $situation == "local" ]
     globalMysqlFolder="_mysql"
     boilerplateFolder="c5-boilerplate"
 
+    rootMysql="/Library/Application\ Support/appsolute/MAMP\ PRO/db/mysql/"
     sqlU="root"
     sqlP="root"
     mysqlHost="localhost"
@@ -134,7 +135,6 @@ dirPackage="$root$globalPackagesFolder"
 dirConcrete="$root$globalConcreteFolder"
 dirMysql="$root$globalMysqlFolder"
 dirApplication="$root$globalApplicationFolder"
-
 
 ### Check for git repos ####
 if [ ! -z ${update+x} ]; then
@@ -308,7 +308,7 @@ if [ ! -d $dirVhost ]; then
       echo " - Creating database $databaseName"
       curl --user '7375bf1d975c4851951523c3babed476 account=myconcretelab:' -d '{"permissions":{"'$sqlU'":"FULL"},"type":"MYSQL","name":"'$databaseName'","encoding":"utf8"}' https://api.alwaysdata.com/v1/database/
     ## Sinon on teste si la DB existe
-    elif [ ! -d /Applications/MAMP/db/mysql/$databaseName ]; then
+  elif [ ! -d "$rootMysql$databaseName" ]; then
       echo " - Creating database $databaseName"
       mysql -u $sqlU -p$sqlP -e "create database $databaseName"
     fi
