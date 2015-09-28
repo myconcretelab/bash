@@ -61,7 +61,7 @@ if [[ $PWD == *"MAMP"* ]] || [[ $PWD == *"seb"* ]]; then
 elif [[ $PWD == *"myconcretelab"* ]]; then
   situation="remote"
 else
-  echo "I don't know where I am : EXIT"
+  echo "I don't know where I am : $PWD EXIT"
   exit
 fi
 
@@ -97,9 +97,12 @@ if [ $situation == "local" ]
 fi
 
 ## Le prefixe de la DB
-if [ ! -z ${extern+x} ]
-  then
-  databasePrefix='local_'
+if [ ! -z ${extern+x} ];then
+  if [ $situation = "remote" ]; then
+    databasePrefix='myconcretelab_local_'
+  else
+    databasePrefix='local_'
+  fi
 else
   databasePrefix='myconcretelab_'
 fi
@@ -348,6 +351,7 @@ if [ -d $dirVhost/application/files/cache ]
   rm -r -f $dirVhost/application/files/cache
 fi
 
+<<<<<<< Updated upstream
 if [ ! -z ${domain+x} ]; then
   if [ ! -a $dirVhost/application/config/app.php ]
     then
@@ -355,4 +359,11 @@ if [ ! -z ${domain+x} ]; then
   else
     echo " - Finished. You may need to update the C5 instalation : http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
   fi
+=======
+if [ ! -a $dirVhost/application/config/app.php ]
+  then
+  echo " - Enjoy installing at http://localhost:8888/$vhost with the database : $databaseName"
+else
+  echo " - Finished. You may need to update the C5 instalation : http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
+>>>>>>> Stashed changes
 fi
