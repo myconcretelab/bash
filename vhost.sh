@@ -29,7 +29,12 @@ case $key in
     ;;
     -e|--extern)
     ## Quand on ne veut pas que le site soit ajouté aux différent git
-    ## que la DB soit avec le prefixe "local_" pluto que "myconcretelab_"
+    ## que la DB soit avec le prefixe "local_" plutot que "myconcretelab_"
+    extern=true
+    ;;
+    -test)
+    ## Raccourci pour -lock et -extern
+    lock=true
     extern=true
     ;;
     -u|--update)
@@ -351,7 +356,6 @@ if [ -d $dirVhost/application/files/cache ]
   rm -r -f $dirVhost/application/files/cache
 fi
 
-<<<<<<< Updated upstream
 if [ ! -z ${domain+x} ]; then
   if [ ! -a $dirVhost/application/config/app.php ]
     then
@@ -359,11 +363,4 @@ if [ ! -z ${domain+x} ]; then
   else
     echo " - Finished. You may need to update the C5 instalation : http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
   fi
-=======
-if [ ! -a $dirVhost/application/config/app.php ]
-  then
-  echo " - Enjoy installing at http://localhost:8888/$vhost with the database : $databaseName"
-else
-  echo " - Finished. You may need to update the C5 instalation : http://localhost:8888/$vhost/index.php/ccm/system/upgrade"
->>>>>>> Stashed changes
 fi
