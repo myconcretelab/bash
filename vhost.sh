@@ -32,7 +32,7 @@ case $key in
     ## que la DB soit avec le prefixe "local_" plutot que "myconcretelab_"
     extern=true
     ;;
-    -test)
+    -test|-local)
     ## Raccourci pour -lock et -extern
     lock=true
     extern=true
@@ -70,6 +70,14 @@ else
   exit
 fi
 
+if [ "$domain" == "" ]; then
+  read -p " - You didn't provide any domain, is it normal ? y/n " -n 1 -r
+  echo    # move to a new line
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo " - Exit"
+      exit 1
+  fi
+fi
 
 ## Fill variable
 if [ $situation == "local" ]
@@ -213,6 +221,12 @@ fi
 ## On supprime le vhost si c'est demandé
 
 if [ ! -z ${delete+x} ] && [ -d $dirVhost ]; then
+  read -p " - We will delete $dirVhost, Are you sure ? y/n " -n 1 -r
+  echo    # move to a new line
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo " - Exit"
+      exit 1
+  fi
   rm -rf $dirVhost
 fi
 
