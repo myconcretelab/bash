@@ -1,6 +1,7 @@
 #!/bin/bash
 
 root="/Applications/MAMP/htdocs/_mysql";
+dbRoot="/Library/Application Support/appsolute/MAMP PRO/db/mysql/"
 
 ### Server Setup ###
 MUSER="root";
@@ -30,7 +31,7 @@ do
   fi
   if [[ $db =~ .*myconcretelab_.* ]]
     then
-    if [ -d /Applications/MAMP/db/mysql/$db ]
+    if [ -d "$dbRoot$db" ]
       then
       file="$root/$db.sql.txt";
       if [ -a $file ]

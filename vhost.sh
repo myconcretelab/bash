@@ -90,7 +90,7 @@ if [ $situation == "local" ]
     globalMysqlFolder="_mysql"
     boilerplateFolder="c5-boilerplate"
 
-    rootMysql="/Library/Application\ Support/appsolute/MAMP\ PRO/db/mysql/"
+    rootMysql="/Library/Application Support/appsolute/MAMP PRO/db/mysql/"
     sqlU="root"
     sqlP="root"
     mysqlHost="localhost"
@@ -327,11 +327,11 @@ if [ ! -d $dirVhost ]; then
 
     if [ $situation = "remote" ]; then
       ## On crée la DB Même si elle existe..
-      echo " - Creating database $databaseName"
+      echo " - Creating database $databaseName on Alwaysdata"
       curl --user '7375bf1d975c4851951523c3babed476 account=myconcretelab:' -d '{"permissions":{"'$sqlU'":"FULL"},"type":"MYSQL","name":"'$databaseName'","encoding":"utf8"}' https://api.alwaysdata.com/v1/database/
     ## Sinon on teste si la DB existe
-  elif [ ! -d "$rootMysql$databaseName" ]; then
-      echo " - Creating database $databaseName"
+    elif [ ! -d "$rootMysql$databaseName" ]; then
+      echo " - Creating database $databaseName on Localhost"
       mysql -u $sqlU -p$sqlP -e "create database $databaseName"
     fi
     ## Maintenant on suppose que si le fichier app.php n'existe pas
