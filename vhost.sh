@@ -329,10 +329,23 @@ if [ ! -d $dirVhost ]; then
       ## On crée la DB Même si elle existe..
       echo " - Creating database $databaseName on Alwaysdata"
       curl --user '7375bf1d975c4851951523c3babed476 account=myconcretelab:' -d '{"permissions":{"'$sqlU'":"FULL"},"type":"MYSQL","name":"'$databaseName'","encoding":"utf8"}' https://api.alwaysdata.com/v1/database/
+    # On supprime la database si l'option delete est selectionné et que la db existe
+    # cela permet de repartir à zero
     ## Sinon on teste si la DB existe
-    elif [ ! -d "$rootMysql$databaseName" ]; then
-      echo " - Creating database $databaseName on Localhost"
-      mysql -u $sqlU -p$sqlP -e "create database $databaseName"
+    elif [ $situation = "local" ]; then
+      if [ ! -z ${delete+x} ] &&  [ -d "$rootMysql$databaseName" ]; then
+        read -p " - We will delete DB $databaseName, Are you sure ? y/n " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+          echo " - Deleting BD $databaseName"
+          mysql -u $sqlU -p$sqlP -e "drop database $databaseName"
+        fi
+      fi
+      # creer la DB si besoin
+      if [ ! -d "$rootMysql$databaseName" ]; then
+        echo " - Creating database $databaseName on Localhost"
+        mysql -u $sqlU -p$sqlP -e "create database $databaseName"
+      fi
     fi
     ## Maintenant on suppose que si le fichier app.php n'existe pas
     ## cela revient a dire que le site n'a jamais été installé
