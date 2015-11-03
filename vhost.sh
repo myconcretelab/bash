@@ -9,6 +9,10 @@ do
 key="$1"
 
 case $key in
+    -user)
+    user="$2"
+    shift # past argument
+    ;;
     -t|--theme)
     theme="$2"
     shift # past argument
@@ -79,16 +83,33 @@ if [ "$domain" == "" ]; then
   fi
 fi
 
+
+
 ## Fill variable
+
+if [ -z ${user+x} ]; then
+  user="myconcretelab"
+else
+  user="roboticadesign"
+fi
+# Check the user
+read -p " - We will work with User $user, it is right ? y/n " -n 1 -r
+echo    # move to a new line
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+  echo " - Exit"
+  exit 1
+fi
+
+
 if [ $situation == "local" ]
   then
     root="/Applications/MAMP/htdocs/"
     dirRel=""
     globalApplicationFolder="_applications"
-    globalPackagesFolder="_packages5.7"
     globalConcreteFolder="_concrete5_engine"
     globalMysqlFolder="_mysql"
     boilerplateFolder="c5-boilerplate"
+    globalPackagesFolder="_packages5.7"
 
     rootMysql="/Library/Application Support/appsolute/MAMP PRO/db/mysql/"
     sqlU="root"
@@ -117,7 +138,11 @@ if [ ! -z ${extern+x} ];then
     databasePrefix='local_'
   fi
 else
-  databasePrefix='myconcretelab_'
+  if [ $user == "myconcretelab" ];then
+    databasePrefix='myconcretelab_'
+  else
+    databasePrefix='myconcretelab_roboticadesign_'
+  fi
 fi
 
 # Si il n'y a pas de sous domaine le domaine est le parametre
@@ -130,7 +155,15 @@ if [ ! -z ${domain+x} ]; then
     then
     domain="$_domain.com"
   else
-    domain="$_domain.myconcretelab.com"
+    if [ ! -z ${extern+x} ];then
+      domain="$_domain.local"
+    else
+      if [ $user == "myconcretelab" ];then
+        domain="$_domain.myconcretelab.com"
+      else
+        domain="$_domain.roboticadesign.com"
+      fi
+    fi
   fi
 
   if [ ! -z ${subdomain+x} ]; then

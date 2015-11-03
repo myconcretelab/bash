@@ -14,12 +14,12 @@ MYSQL=`which mysql`;
 MYSQLDUMP=`which mysqldump`;
 GZIP=`which gzip`;
 
-# get all database listing
 if [ ! $1 == "" ]
   then
     DBS="$@"
     completeDbName=true
   else
+    # get all database listing
     DBS="$(mysql -u $MUSER -p$MPASS -h $MHOST -P $MPORT -Bse 'show databases')"
     completeDbName=false
 fi
