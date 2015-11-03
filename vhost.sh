@@ -151,8 +151,7 @@ if [ ! -z ${domain+x} ]; then
   _domain="$domain"
   ## Si le domaine est myconcretelab alors le domaine est myconcretelab.com
   ## Sinon, c'est lenomdusite.myconcretelab.com
-  if [ "$domain" = "myconcretelab" ]
-    then
+  if [ "$domain" = "myconcretelab" ] || [ "$domain" = "roboticadesign" ];then
     domain="$_domain.com"
   else
     if [ ! -z ${extern+x} ];then
