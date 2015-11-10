@@ -41,7 +41,7 @@ case $key in
     lock=true
     extern=true
     ;;
-    -u|--update)
+    --update)
     ## Quand on veut mettre a jour les git
     update=true
     ;;
