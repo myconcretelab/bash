@@ -14,6 +14,8 @@ case $key in
     shift # past argument
     ;;
     -t|--theme)
+    ## Specifier le theme empeche le lien symbolique de tous les package
+    ## et necopie que le package necessaire.
     theme="$2"
     shift # past argument
     ;;
@@ -48,10 +50,6 @@ case $key in
     -del|--delete)
     ## Quand on veut Supprimer le dossier vhost avant de l'installer
     delete=true
-    ;;
-    -np|--nopackage)
-    ## Quand on ne veut pas de lien symbolique vers les packages
-    nopackage=true
     ;;
     -nodb)
     ## Quand on ne veut pas creer / updater la db
@@ -93,11 +91,13 @@ else
   user="roboticadesign"
 fi
 # Check the user
-read -p " - We will work with User $user, it is right ? y/n " -n 1 -r
-echo    # move to a new line
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  echo " - Exit"
-  exit 1
+if [ -z ${extern+x} ];then
+  read -p " - We will work with User $user, it is right ? y/n " -n 1 -r
+  echo    # move to a new line
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo " - Exit"
+    exit 1
+  fi
 fi
 
 
@@ -283,19 +283,23 @@ if [ ! -d $dirVhost ]; then
     echo " - Cleaning application from boilerplate"
     rm -rf "$dirVhost/.git"
   fi
-  echo " - Creating symbolic links to concrete"
-  ln -s $dirConcrete/concrete $dirVhost/concrete
-  if [ -z ${nopackage+x} ]; then
+  ## Si lock n'est pas defini, on fait un lien symbolique de tous les packages
+  if [ -z ${lock+x} ]; then
+    echo " - Creating symbolic links to concrete"
+    ln -s $dirConcrete/concrete $dirVhost/concrete
     echo " - Creating symbolic links to packages"
     ln -s $dirPackage $dirVhost/packages
   else
     echo " - Creating packages folder"
     mkdir "$dirVhost/packages"
+    echo " - Copying Concrete folder"
+    cp -r $dirConcrete/concrete $dirVhost/concrete
     if [ ! -z ${theme+x} ]; then
       # Si on a specifié un theme, alors on le copie, sans faire de lien symbolique.
       # C arrive pour les site de demo dans lesquel, meme si l'utilsateurs supprime le package via l'interface
       # Il ne sera pas supprimé dans le git
-      cp -r "$dirPackage/$theme" "$dirVhost/packages"
+      echo " - Copying $theme package"
+      cp -r "$dirPackage/$theme" "$dirVhost/packages/$theme"
     fi
   fi
 
