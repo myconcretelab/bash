@@ -284,16 +284,14 @@ if [ ! -d $dirVhost ]; then
     rm -rf "$dirVhost/.git"
   fi
   ## Si lock n'est pas defini, on fait un lien symbolique de tous les packages
-  if [ -z ${lock+x} ]; then
     echo " - Creating symbolic links to concrete"
     ln -s $dirConcrete/concrete $dirVhost/concrete
+  if [ -z ${lock+x} ]; then
     echo " - Creating symbolic links to packages"
     ln -s $dirPackage $dirVhost/packages
   else
     echo " - Creating packages folder"
     mkdir "$dirVhost/packages"
-    echo " - Copying Concrete folder"
-    cp -r $dirConcrete/concrete $dirVhost/concrete
     if [ ! -z ${theme+x} ]; then
       # Si on a specifié un theme, alors on le copie, sans faire de lien symbolique.
       # C arrive pour les site de demo dans lesquel, meme si l'utilsateurs supprime le package via l'interface
