@@ -43,7 +43,7 @@ case $key in
     lock=true
     extern=true
     ;;
-    --update)
+    -u|--update)
     ## Quand on veut mettre a jour les git
     update=true
     ;;
@@ -60,6 +60,25 @@ case $key in
 esac
 shift # past argument or value
 done
+
+# define usage function
+usage(){
+	 echo "Usage: $0 [-tdsle] [-del-test-local]"
+   echo "       -t --theme        Theme name for update"
+   echo "       -d --domain       Domain name"
+   echo "       -s --subdomain    Sub-domain name"
+   echo "       -l --lock         Copy Application folder"
+   echo "       -e --extern       Don't put as GIT"
+   echo "       -test -local      lock & Extern"
+   echo "       -u --update       Update git before"
+   echo "       -del --delete     delete Files and DB before"
+	exit 1
+}
+
+## Aucunargument ? Alors usage
+if [ ${#@} == 0 ]; then
+  usage
+fi
 
 ## Maintenant on va voir si on est en local ou en remote
 
