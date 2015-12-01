@@ -4,6 +4,25 @@
 ##  ./create-vhost.sh handle_theme domain subdomain : create subdomain.domain and .git application
 ##  ./create-vhost.sh none domain subdomain : create subdomain.domain BUT do not .git application
 
+# define usage function
+usage(){
+	 echo "Usage: $0 [-tdsle] [-del-test-local]"
+   echo "       -t --theme        Theme name for update"
+   echo "       -d --domain       Domain name"
+   echo "       -s --subdomain    Sub-domain name"
+   echo "       -l --lock         Copy Application folder"
+   echo "       -e --extern       Don't put as GIT"
+   echo "       -test -local      lock & Extern"
+   echo "       -u --update       Update git before"
+   echo "       -del --delete     delete Files and DB before"
+	exit 1
+}
+
+## Aucun argument ? Alors usage
+if [[ $# -eq 0 ]] ; then
+  usage
+fi
+
 while [[ $# > 0 ]]
 do
 key="$1"
@@ -61,24 +80,6 @@ esac
 shift # past argument or value
 done
 
-# define usage function
-usage(){
-	 echo "Usage: $0 [-tdsle] [-del-test-local]"
-   echo "       -t --theme        Theme name for update"
-   echo "       -d --domain       Domain name"
-   echo "       -s --subdomain    Sub-domain name"
-   echo "       -l --lock         Copy Application folder"
-   echo "       -e --extern       Don't put as GIT"
-   echo "       -test -local      lock & Extern"
-   echo "       -u --update       Update git before"
-   echo "       -del --delete     delete Files and DB before"
-	exit 1
-}
-
-## Aucunargument ? Alors usage
-if [ ${#@} == 0 ]; then
-  usage
-fi
 
 ## Maintenant on va voir si on est en local ou en remote
 
