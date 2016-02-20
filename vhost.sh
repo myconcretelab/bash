@@ -15,6 +15,7 @@ usage(){
    echo "       -test -local      lock & Extern"
    echo "       -u --update       Update git before"
    echo "       -del --delete     delete Files and DB before"
+	 echo "       -user     				if exist roboticadesign will be used"
 	exit 1
 }
 
